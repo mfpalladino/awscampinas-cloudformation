@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Um exemplo de template minimo: Criando estrutura para um recurso customizado'
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: General
+      Parameters:
+      - Environment
+    - Label:
+        default: Array values
+      Parameters:
+      - Key1Value
+      - Key2Value
+      - Key3Value
+Parameters:
+  Environment:
+    Description: Environment where the stack is being deployed
+    Type: String
+    AllowedValues:
+    - qa
+    - labs
+    - hmg
+    - prod
+  Key1Value:
+    Description: Value of key 1
+    Type: String
+  Key2Value:
+    Description: Value of key 2
+    Type: String
+  Key3Value:
+    Description: Value of key 3
+    Type: String
+Resources:
+  MyCustomResourceLambdaRole:
+    Type: "AWS::IAM::Role"
+    Properties: 
+      Path: "/"
+      ManagedPolicyArns:
+          - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Sid: "AllowLambdaServiceToAssumeRole"
+            Effect: "Allow"
+            Action: 
+              - "sts:AssumeRole"
+            Principal:
+              Service: 
+                - "lambda.amazonaws.com"
+  MyCustomResourceLambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Properties: 
+      FunctionName: MyCustomResourceHandler
+      Code:
+        ZipFile: |
+          from __future__ import print_function
+          import json
+          import logging
+          import cfnresponse
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)  
+          def handler(event, context):
+              logger.info("Event: " + str(event))
+              message = json.loads(json.dumps(event))    
+              logger.info("Message: " + str(message))   
+              response = "SUCCESS"
+              cfnresponse.send(event, context, response, None)
+      Description: Execute action to my curstom resource
+      Handler: index.handler
+      MemorySize: 128
+      Role: !GetAtt ['MyCustomResourceLambdaRole', Arn]
+      Runtime: python3.6
+      Timeout: 120  
+  MyCustomResourceUsing: 
+    Type: "Custom::MyCustomResource"
+    Version: "1.0"
+    Properties: 
+      ServiceToken: !GetAtt ['MyCustomResourceLambdaFunction', Arn]
+      Property1: "Value of property 1"
+      Property2: !Ref 'Environment'
+      ArrayProperty:
+        - Key: "Key1"
+          Value: !Ref Key1Value
+        - Key: "Key2"
+          Value: !Ref Key2Value
+        - Key: "Key3"
+          Value: !Ref Key3Value      

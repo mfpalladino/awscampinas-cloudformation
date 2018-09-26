@@ -1,0 +1,5 @@
+https://docs.aws.amazon.com/cli/latest/reference/cloudformation
+
+aws cloudformation create-stack --stack-name Teste --template-body file://Teste.yml --parameters ParameterKey=Environment,ParameterValue=dev --enable-termination-protection --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation describe-stacks --stack-name Teste
+aws cloudformation delete-stack --stack-name Teste

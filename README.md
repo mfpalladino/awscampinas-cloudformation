@@ -1,0 +1,1 @@
+#Exemplos utilizados durante a apresentação sobre AWS CloudFormation no AWS Campinas (25/09/2018)

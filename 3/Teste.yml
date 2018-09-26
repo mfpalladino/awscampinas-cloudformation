@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Um exemplo de template minimo: parametros e funcoes'
+Parameters:
+  Environment:
+    Description: Ambiente
+    Type: String
+    AllowedValues:
+    - dev
+    - hmg
+    - prod
+Resources:
+  AwsUser:
+    Type: AWS::IAM::User
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ['meubucketteste20180921-${Environment}', {Environment: !Ref 'Environment'}] 

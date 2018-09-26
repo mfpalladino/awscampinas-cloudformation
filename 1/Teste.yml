@@ -1,0 +1,5 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Um exemplo de template minimo'
+Resources:
+  AwsUser:
+    Type: AWS::IAM::User

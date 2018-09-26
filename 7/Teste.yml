@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Um exemplo de template minimo: protecao contra exclusao'
+Mappings:
+  EnvironmentMap:
+    dev:
+      BucketSuffix: '001'
+    hmg:
+      BucketSuffix: '002'
+    prod:
+      BucketSuffix: '003'
+Parameters:
+  Environment:
+    Description: Ambiente
+    Type: String
+    AllowedValues:
+    - dev
+    - hmg
+    - prod
+Resources:
+  AwsUser:
+    Type: AWS::IAM::User
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ['${Suffix}-meubucketteste20180921-${Environment}', {Suffix: !FindInMap [EnvironmentMap, !Ref 'Environment', BucketSuffix], Environment: !Ref 'Environment'}] 
+Outputs:
+  BucketName:
+    Description: Nome do bucket
+    Value: !Ref Bucket
+  BucketArn:
+    Description: Arn do bucket
+    Value: !GetAtt [Bucket, Arn]
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketArn'
+    

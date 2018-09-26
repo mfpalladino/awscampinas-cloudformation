@@ -1,0 +1,1 @@
+https://docs.aws.amazon.com/pt_br/AWSCloudFormation/latest/UserGuide/aws-attribute-deletionpolicy.html

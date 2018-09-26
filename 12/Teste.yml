@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Um exemplo de template minimo: usando include e transform:serverless'
+Mappings:
+  EnvironmentMap:
+    dev:
+      BucketSuffix: '001'
+    hmg:
+      BucketSuffix: '002'
+    prod:
+      BucketSuffix: '003'
+Parameters:
+  Environment:
+    Description: Ambiente
+    Type: String
+    AllowedValues:
+    - dev
+    - hmg
+    - prod
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  AwsUser:
+    Type: AWS::IAM::User
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ['${Suffix}-meubucketteste20180921-${Environment}', {Suffix: !FindInMap [EnvironmentMap, !Ref 'Environment', BucketSuffix], Environment: !Ref 'Environment'}] 
+  'Fn::Transform':
+      Name: 'AWS::Include'
+      Parameters:
+        Location : "s3://qa.cf.snippets/recursos_comuns.yml"     
+  MyFunctionTest:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: index.handler
+        Runtime: nodejs4.3
+        CodeUri: 's3://qa.cf.snippets/meu_codigo.zip'        
+Outputs:
+  BucketName:
+    Description: Nome do bucket
+    Value: !Ref Bucket
+  BucketArn:
+    Description: Arn do bucket
+    Value: !GetAtt [Bucket, Arn]
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketArn'
+    

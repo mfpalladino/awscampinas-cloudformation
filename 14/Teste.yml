@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Um exemplo de template minimo: condições'
+Mappings:
+  EnvironmentMap:
+    dev:
+      BucketSuffix: '001'
+    hmg:
+      BucketSuffix: '002'
+    prod:
+      BucketSuffix: '003'
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: General
+      Parameters:
+      - Environment
+    - Label:
+        default: Conditions
+      Parameters:
+      - MustCreateBucket
+      - MustCreateUser
+Parameters:
+  Environment:
+    Description: Ambiente
+    Type: String
+    AllowedValues:
+    - dev
+    - hmg
+    - prod
+  MustCreateBucket:
+    Type: String
+    Default: 'yes'
+    AllowedValues:
+      - 'yes'
+      - 'no'  
+  MustCreateUser:
+    Type: String
+    Default: 'yes'
+    AllowedValues:
+      - 'yes'
+      - 'no'  
+Conditions:
+  MustCreateBucketCondition: !Equals 
+    - !Ref MustCreateBucket
+    - 'yes'
+  MustCreateUserCondition: !Equals 
+    - !Ref MustCreateUser
+    - 'yes'
+Resources:
+  AwsUser:
+    Type: AWS::IAM::User
+    Condition: MustCreateUserCondition
+  Bucket:
+    Type: AWS::S3::Bucket
+    Condition: MustCreateBucketCondition    
+    Properties:
+      BucketName: !Sub ['${Suffix}-meubucketteste20180921-${Environment}', {Suffix: !FindInMap [EnvironmentMap, !Ref 'Environment', BucketSuffix], Environment: !Ref 'Environment'}] 
+Outputs:
+  BucketName:
+    Description: Nome do bucket
+    Value: !Ref Bucket
+  BucketArn:
+    Description: Arn do bucket
+    Value: !GetAtt [Bucket, Arn]
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketArn'
+    

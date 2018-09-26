@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Um exemplo de template minimo: usando include, transform e macros customizadas'
+Mappings:
+  EnvironmentMap:
+    dev:
+      BucketSuffix: '001'
+    hmg:
+      BucketSuffix: '002'
+    prod:
+      BucketSuffix: '003'
+Parameters:
+  Environment:
+    Description: Ambiente
+    Type: String
+    AllowedValues:
+    - dev
+    - hmg
+    - prod
+  InputString:
+    Description: Uma string qualquer
+    Type: String
+Resources:
+  AwsUser:
+    Type: AWS::IAM::User
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ['${Suffix}-meubucketteste20180921-${Environment}', {Suffix: !FindInMap [EnvironmentMap, !Ref 'Environment', BucketSuffix], Environment: !Ref 'Environment'}] 
+      Tags:
+              - Key: Upper
+                Value:
+                  'Fn::Transform':
+                  - Name: 'String'
+                    Parameters:
+                      InputString: !Ref InputString
+                      Operation: Upper
+              - Key: Lower
+                Value:
+                  'Fn::Transform':
+                  - Name: 'String'
+                    Parameters:
+                      InputString: !Ref InputString
+                      Operation: Lower
+              - Key: Capitalize
+                Value:
+                  'Fn::Transform':
+                  - Name: 'String'
+                    Parameters:
+                      InputString: !Ref InputString
+                      Operation: Capitalize
+              - Key: Title
+                Value:
+                  'Fn::Transform':
+                  - Name: 'String'
+                    Parameters:
+                      InputString: !Ref InputString
+                      Operation: Title
+              - Key: Replace
+                Value:
+                  'Fn::Transform':
+                  - Name: 'String'
+                    Parameters:
+                      InputString: !Ref InputString
+                      Operation: Replace
+                      Old: " "
+                      New: "_"
+              - Key: Strip
+                Value:
+                  'Fn::Transform':
+                  - Name: 'String'
+                    Parameters:
+                      InputString: !Ref InputString
+                      Operation: Strip
+                      Chars: Tgif
+              - Key: ShortenLeft
+                Value:
+                  'Fn::Transform':
+                  - Name: 'String'
+                    Parameters:
+                      InputString: !Ref InputString
+                      Operation: MaxLength
+                      Length: 4
+                      StripFrom: Left
+              - Key: ShortenRight
+                Value:
+                  'Fn::Transform':
+                  - Name: 'String'
+                    Parameters:
+                      InputString: !Ref InputString
+                      Operation: MaxLength
+                      Length: 4
+Outputs:
+  BucketName:
+    Description: Nome do bucket
+    Value: !Ref Bucket
+  BucketArn:
+    Description: Arn do bucket
+    Value: !GetAtt [Bucket, Arn]
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketArn'
+    
